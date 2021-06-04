@@ -13,7 +13,6 @@ using System;
 
 namespace TimerCount
 {
-    [Serializable]
     public class CountTimer
     {
         #region Variables 
@@ -24,9 +23,6 @@ namespace TimerCount
 
         private IEnumerator enumerator;
         private IEnumerator enumeratorEvent;
-        [Space(10)]
-        [Header("Setting your events loop")]
-        [Range(0,1000)]
         [SerializeField]private int timeEvent;
         [SerializeField]private bool isRunning;
         [SerializeField] private bool startOnAwake;
@@ -40,6 +36,21 @@ namespace TimerCount
                 if (value)
                 {
                     enumeratorEvent = TimerEvents(); mono.StartCoroutine(enumeratorEvent);
+                }
+                else
+                {
+                    mono.StopCoroutine(enumeratorEvent);
+                }
+            }
+        }
+
+        public bool playCountEventUnscaled
+        {
+            set
+            {
+                if (value)
+                {
+                    enumeratorEvent = TimerEventsUnscaled(); mono.StartCoroutine(enumeratorEvent);
                 }
                 else
                 {
@@ -181,8 +192,7 @@ namespace TimerCount
         /// </summary>
         /// <param name="time">Time to take event.</param>
         public void CountEvent(int time) => timeEvent = time;
-   
-
+  
         public void StopCountDown()
         {
             mono.StopCoroutine(enumerator);
@@ -290,6 +300,15 @@ namespace TimerCount
             while (timeEvent > 0)
             {
                 yield return new WaitForSeconds(timeEvent);
+                OnTimerEvent?.Invoke();
+            }
+        }
+
+        private IEnumerator TimerEventsUnscaled()
+        {
+            while (timeEvent > 0)
+            {
+                yield return new WaitForSecondsRealtime(timeEvent);
                 OnTimerEvent?.Invoke();
             }
         }
